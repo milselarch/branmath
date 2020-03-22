@@ -58,12 +58,15 @@ class Tester(object):
             ans, tries, key = 0, 512, None
             N1, N2 = 0, 0
 
-            while key == None or key in dones:
+            while (key is None) or (key in dones):
                 # input(f'REPEAT {(N1, N2)}')
-                D1 = random.choice(range(1, int(difficulty) + 1))
-                D2 = difficulty // D1
-                N1 = random.choice(range(1, int(10 ** D1)))
-                N2 = random.choice(range(1, int(10 ** D2)))
+                D1 = max(random.random() * difficulty, 1)
+                D2 = difficulty / D1
+                M1 = max(2, int(10 ** D1))
+                M2 = max(2, int(10 ** D2))
+
+                N1 = random.choice(range(2, M1 + 1))
+                N2 = random.choice(range(2, M2 + 1))
                 key = tuple(sorted([N1, N2]))
 
                 ans = N1 * N2
