@@ -65,6 +65,7 @@ class Tester(object):
                 N1 = random.choice(range(1, int(10 ** D1)))
                 N2 = random.choice(range(1, int(10 ** D2)))
                 key = tuple(sorted([N1, N2]))
+
                 ans = N1 * N2
                 tries -= 1
 
