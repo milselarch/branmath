@@ -58,7 +58,7 @@ class Tester(object):
             ans, tries, key = 0, 512, None
             N1, N2 = 0, 0
 
-            while key in dones:
+            while key == None or key in dones:
                 # input(f'REPEAT {(N1, N2)}')
                 D1 = random.choice(range(1, int(difficulty) + 1))
                 D2 = difficulty // D1
