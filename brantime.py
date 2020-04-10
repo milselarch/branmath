@@ -39,14 +39,30 @@ class Tester(object):
     def __init__(self):
         self.difficulty = None
 
+    def humanize(self, minutes):
+        hours = minutes // 60
+        modmin = minutes % 60
+
+        if minutes < 60:
+            return f'12:{minutes} AM'
+        elif minutes < 60 * 12:
+            return f'{hours}:{modmin} AM'
+        elif 60 * 12 <= minutes < 60 * 13:
+            return f'{12}:{modmin} PM'
+        else:
+            return f'{hours % 12}:{modmin} PM'
+
+    def readMin(self, output):
+        if ':' in output:
+            output = [int(x) for x in output.split(':')]
+            hours, minutes = output
+            output = hours * 60 + minutes
+
+        return int(output)
+
     def play(self):
         dones = [(0, 0)]
-        difficulty = None
-        while difficulty is None:
-            try:
-                difficulty = float(input('difficulty: '))
-            except ValueError:
-                pass
+        difficulty = -1
 
         turn = 1
         stop = False
@@ -60,23 +76,21 @@ class Tester(object):
 
             while (key is None) or (key in dones):
                 # input(f'REPEAT {(N1, N2)}')
-                D1 = max(random.random() * difficulty, 1)
-                D2 = difficulty / D1
-                M1 = max(2, int(10 ** D1))
-                M2 = max(2, int(10 ** D2))
+                D1 = random.choice(range(60 * 24))
+                D2 = random.choice(range(60 * 24))
+                D1, D2 = sorted([D1, D2])
+                N1 = self.humanize(D1)
+                N2 = self.humanize(D2)
 
-                N1 = random.choice(range(2, M1 + 1))
-                N2 = random.choice(range(2, M2 + 1))
-                key = tuple(sorted([N1, N2]))
-
-                ans = N1 * N2
+                key = (D1, D2)
+                ans = D2 - D1
                 tries -= 1
 
                 if tries == 0:
                     stop = True
                     break
 
-            question = f"{N1} × {N2} = "
+            question = f"{N1} to {N2} = "
             start = time.time()
             answers = []
             output = None
@@ -90,8 +104,9 @@ class Tester(object):
                     break
 
                 try:
-                    output = int(output)
+                    output = self.readMin(output)
                     answers.append(output)
+                    # print('OUTANS', output, ans)
                 except ValueError:
                     print(f"OUT[{turn}]: INVALID")
 
@@ -100,7 +115,7 @@ class Tester(object):
             info = Question(N1, N2, answers, duration)
             dones.append(key)
 
-            points = info.getPoints()
+            points = 1
             # input(f"OUT[{turn}]: points: {round(points, 2)}")
             history.append(info)
 
