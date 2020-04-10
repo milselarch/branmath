@@ -5,6 +5,7 @@ import os
 
 import datetime
 
+
 class Question(object):
     def __init__(self, N1, N2, answers, duration):
         self.answers = answers
@@ -16,15 +17,10 @@ class Question(object):
         return len(self.answers) == 1
 
     def getDifficulty(self):
-        return math.log10(1 + self.N1) * math.log10(1 + self.N2)
+        return 1
 
     def getPoints(self):
-        difficulty = self.getDifficulty()
-        points = difficulty * int(self.correct())
-        discount = 1 - 1 / (10 ** difficulty)
-        # print(difficulty, points, discount, self.correct(), self.answers)
-        points *= discount
-        return points
+        return abs(self.N2) - abs(self.N1)
 
     def encode(self):
         return {
@@ -42,18 +38,24 @@ class Tester(object):
     def humanize(self, minutes):
         hours = minutes // 60
         modmin = minutes % 60
+        strmin = str(modmin)
+        if len(strmin) == 1:
+            strmin = '0' + strmin
 
         if minutes < 60:
-            return f'12:{minutes} AM'
+            return f'12:{strmin} AM'
         elif minutes < 60 * 12:
-            return f'{hours}:{modmin} AM'
+            return f'{hours}:{strmin} AM'
         elif 60 * 12 <= minutes < 60 * 13:
-            return f'{12}:{modmin} PM'
+            return f'{12}:{strmin} PM'
         else:
-            return f'{hours % 12}:{modmin} PM'
+            return f'{hours % 12}:{strmin} PM'
 
     def readMin(self, output):
         if ':' in output:
+            if output.endswith(':'):
+                output += '0'
+
             output = [int(x) for x in output.split(':')]
             hours, minutes = output
             output = hours * 60 + minutes
@@ -73,6 +75,7 @@ class Tester(object):
         while stop is False:
             ans, tries, key = 0, 512, None
             N1, N2 = 0, 0
+            D1, D2 = 0, 0
 
             while (key is None) or (key in dones):
                 # input(f'REPEAT {(N1, N2)}')
@@ -112,10 +115,10 @@ class Tester(object):
 
             end = time.time()
             duration = end - start
-            info = Question(N1, N2, answers, duration)
+            info = Question(D1, D2, answers, duration)
             dones.append(key)
 
-            points = 1
+            points = sum([question.getPoints() for question in history])
             # input(f"OUT[{turn}]: points: {round(points, 2)}")
             history.append(info)
 
@@ -140,7 +143,8 @@ class Tester(object):
         open(f'stats/{fname}.txt', 'w').write(str({
             'history': [h.encode() for h in history],
             'duration': duration, 'start': startTime,
-            'points': points
+            'points': points,
+            'type': 'timediff'
         }))
 
 
